@@ -1,5 +1,7 @@
 #include <iostream>
 #include "md5.h"
+#include <stdio.h>
+#include <time.h>
 
 using namespace std;
 
@@ -87,42 +89,70 @@ string getNextPassword() {
     return password;
 }
 
+string timestamp() {
+  
+    time_t rawtime;
+    struct tm * timeinfo;
+    char buffer [80];
+
+    time (&rawtime);
+    timeinfo = localtime (&rawtime);
+
+    strftime(buffer,80,"%F %T",timeinfo);
+
+    return string(buffer);
+    // puts (buffer);
+}
 
 
 int main()
 {
-    cout << "Hello World" << endl;
+    cout << timestamp() << " Starting Azhans Bruteforce!" << endl;
 
     string finalresponse = "f2e5deb88d09181be414f2f30e0ae95c";
 
     on_alphabet = true;
     on_number = true;
+    on_ALPHABET = true;
+    on_symbol = true;
 
-    prepare();
+    bool found = false;
 
+    while (found == false) {
+        prepare();
 
-    string pass = getNextPassword();
-    string passmd5 = "";
-    
-    double counter = 0;
-    int dispcouter = 0;
-    while (pass != "") {
+        string pass = getNextPassword();
+        string passmd5 = "";
+        
+        int dispcouter = 0;
 
-        passmd5 = genResponse(pass);
+        while (pass != "") {
+            passmd5 = genResponse(pass);
 
-        if (dispcouter == 1000000) {
-            cout << counter << "\t: " << finalresponse << "<->" << passmd5 << " : " << pass << endl;
-            dispcouter = 0;
+            if (dispcouter == 5000000) {
+                cout << timestamp() << " test " << finalresponse << "<->" << passmd5 << " : " << pass << endl;
+                dispcouter = 0;
+            }
+
+            if (passmd5 == finalresponse) {
+                cout << timestamp() <<" MATCH! password is \"" << pass << "\".";
+                found = true;
+                break;
+            }
+
+            pass = getNextPassword();
+            dispcouter++;
         }
 
-        if (passmd5 == finalresponse) {
-            cout << "Match! password is \"" << pass << "\".";
-            break;
+        if (found == false) {
+            password_length++;
+            cout << timestamp() << " Increasing password length to " << password_length << " characters!" << endl;
         }
 
-        pass = getNextPassword();
-        counter++;
-        dispcouter++;
+        if (password_length > max_password_length) {
+            cout << timestamp() << " MAXMIUM REACHED! exiting...";
+            return 0;
+        }
     }
 
     return 0;
