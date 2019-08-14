@@ -1,9 +1,19 @@
 #include <iostream>
 #include "md5.h"
-#include <stdio.h>
+#include <sys/stat.h>
 #include <time.h>
+#include <fstream>
 
 using namespace std;
+
+
+const string control_file = "bruteforce.running.pid";
+
+inline bool file_exists (const std::string& name) {
+  struct stat buffer;   
+  return (stat (name.c_str(), &buffer) == 0); 
+}
+
 
 string genResponse(string password) {
     // HA1 = MD5(username:realm:password)
@@ -39,6 +49,9 @@ string password = "";
  *  method prepares the script for bruteforce password generation
  **/
 void prepare() {
+
+    pstr = "";
+
     if (on_alphabet == true) {
         pstr += alphabet;
     }
@@ -118,6 +131,13 @@ int main()
 
     bool found = false;
 
+
+    // create the control file
+    std::ofstream outfile (control_file);
+    outfile << "starting" << std::endl;
+    outfile.close();
+
+
     while (found == false) {
         prepare();
 
@@ -132,6 +152,11 @@ int main()
             if (dispcouter == 5000000) {
                 cout << timestamp() << " test " << finalresponse << "<->" << passmd5 << " : " << pass << endl;
                 dispcouter = 0;
+
+                if (!file_exists(control_file)) {
+                    cout << timestamp() << " pid file removed. exiting..." << endl;
+                    return 0;
+                }
             }
 
             if (passmd5 == finalresponse) {
@@ -151,6 +176,11 @@ int main()
 
         if (password_length > max_password_length) {
             cout << timestamp() << " MAXMIUM REACHED! exiting...";
+            return 0;
+        }
+
+        if (!file_exists(control_file)) {
+            cout << timestamp() << " pid file removed. exiting..." << endl;
             return 0;
         }
     }
