@@ -8,6 +8,8 @@ using namespace std;
 
 
 const string control_file = "bruteforce.running.pid";
+const string state_file = "bruteforce.state.txt";
+
 
 inline bool file_exists (const std::string& name) {
   struct stat buffer;   
@@ -117,6 +119,30 @@ string timestamp() {
     // puts (buffer);
 }
 
+void save_state() {
+    // create the state file
+    ofstream outfile (state_file);
+    outfile << "length:" << password_length << endl;
+    outfile << "simple:" << on_alphabet << endl;
+    outfile << "capital:" << on_ALPHABET << endl;
+    outfile << "numeric:" << on_number << endl;
+    outfile << "symbols:" << on_symbol << endl;
+
+    outfile << "pattern:";
+    for (int i=0; i<max_password_length; i++) {
+        outfile << pwd[i] << ",";
+    }
+    outfile << endl;
+
+    outfile << "lastpassword:";
+    for (int i=0; i<password_length; i++) {
+        outfile << pstr.at( pwd[i] );
+    }
+    outfile << endl;
+
+    outfile.close();
+}
+
 
 int main()
 {
@@ -133,9 +159,12 @@ int main()
 
 
     // create the control file
-    std::ofstream outfile (control_file);
-    outfile << "starting" << std::endl;
+    ofstream outfile (control_file);
+    outfile << "starting" << endl;
     outfile.close();
+
+    int dispcouter = 0;
+    int countx = 0;
 
 
     while (found == false) {
@@ -144,17 +173,19 @@ int main()
         string pass = getNextPassword();
         string passmd5 = "";
         
-        int dispcouter = 0;
 
         while (pass != "") {
             passmd5 = genResponse(pass);
 
-            if (dispcouter == 5000000) {
-                cout << timestamp() << " test " << finalresponse << "<->" << passmd5 << " : " << pass << endl;
+            if (dispcouter == 1000000) {
+                countx++;
+
+                cout << timestamp() << " " << (countx * 5) << "M\t -> " << pass << endl;
                 dispcouter = 0;
 
                 if (!file_exists(control_file)) {
                     cout << timestamp() << " pid file removed. exiting..." << endl;
+                    save_state();
                     return 0;
                 }
             }
@@ -181,6 +212,7 @@ int main()
 
         if (!file_exists(control_file)) {
             cout << timestamp() << " pid file removed. exiting..." << endl;
+            save_state();
             return 0;
         }
     }
