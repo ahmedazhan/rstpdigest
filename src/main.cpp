@@ -11,7 +11,7 @@ const string control_file = "bruteforce.running.pid";
 const string state_file = "bruteforce.state.txt";
 
 
-inline bool file_exists (const std::string& name) {
+inline bool file_exists (const string& name) {
   struct stat buffer;   
   return (stat (name.c_str(), &buffer) == 0); 
 }
@@ -121,7 +121,7 @@ string timestamp() {
 
 void save_state() {
     // create the state file
-    ofstream outfile (state_file);
+    ofstream outfile (state_file.c_str());
     outfile << "length:" << password_length << endl;
     outfile << "simple:" << on_alphabet << endl;
     outfile << "capital:" << on_ALPHABET << endl;
