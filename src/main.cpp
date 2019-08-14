@@ -177,7 +177,7 @@ int main()
         while (pass != "") {
             passmd5 = genResponse(pass);
 
-            if (dispcouter == 1000000) {
+            if (dispcouter == 5000000) {
                 countx++;
 
                 cout << timestamp() << " " << (countx * 5) << "M\t -> " << pass << endl;
