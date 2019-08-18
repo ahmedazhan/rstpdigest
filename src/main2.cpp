@@ -14,10 +14,10 @@ const string alphabet="abcdefghijklmnopqrstuvwxyz";
 const string ALPHABET="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const string s_symbol="!@#$%&";
 const string number="0123456789";
-const string hexnumber="0123456789abcdef";
+const string hexadecimal="0123456789abcdef";
 
 const int min_password_length = 8;
-const int max_password_length = 16;
+const int max_password_length = 5;
 int password_length = min_password_length;
 int character_length;
 
@@ -25,19 +25,10 @@ bool on_alphabet = false;
 bool on_ALPHABET = false;
 bool on_symbol = false;
 bool on_number = false;
-bool on_hex = false;
 
 int pwd[max_password_length];
 string pstr = "";
 string password = "";
-string ha2 = "";
-
-string method = "";
-string uri = "";
-string nonce = "";
-string username = "";
-string realm = "";
-string finalresponse = "";
 
 
 /**
@@ -53,9 +44,9 @@ string genResponse(string password) {
     // HA1 = MD5(username:realm:password)
     // HA2 = MD5(method:digestURI)
     // response = MD5(HA1:nonce:HA2)
-    string ha1 = md5(username + ":" + realm + ":" + password);
-    // string ha1 = md5("admin:IP Camera(C5426):" + password);
-    string response = md5(ha1 + ":" + nonce + ":" + ha2);
+    string ha1 = md5("admin:IP Camera(C5426):" + password);
+    string ha2 = md5("SETUP:/ch1/main/av_stream");
+    string response = md5(ha1 + ":6efad5225d8cbca2a6c0bb8adb4615a3:" + ha2);
     return response;
 }
 
@@ -65,35 +56,13 @@ string genResponse(string password) {
  **/
 void prepare() {
 
-    pstr = "";
-
-    if (on_alphabet == true) {
-        pstr += alphabet;
-    }
-
-    if (on_ALPHABET == true) {
-        pstr += ALPHABET;
-    }
-
-    if (on_number == true) {
-        pstr += number;
-    }
-
-    if (on_symbol == true) {
-        pstr += s_symbol;
-    }
-
-    if (on_hex == true) {
-        pstr += hexnumber;
-    }
+    pstr = hexadecimal;
 
     character_length = pstr.length();
 
     for (int i=0; i<max_password_length; i++) {
         pwd[i] = 0;
     }
-
-    string ha2 = md5(method + ":" + uri);
 }
 
 
@@ -171,67 +140,38 @@ void save_state() {
 }
 
 
-
 /**
  *  Main programm
  **/
 int main()
 {
 
-    cout << "Azhan's RTSP digest hash crack..." << endl;
+    string tmp = genResponse("abcd1234");
 
-    bool prompt = true;
+    cout << "HASH: " << tmp << endl;
+    cout << "RESP: " << "f2e5deb88d09181be414f2f30e0ae95c" << endl;
+    cout << "TEST: " << ((tmp == "f2e5deb88d09181be414f2f30e0ae95c") ? "MATCH" : "NOPE") << endl;
 
-    while (prompt) {
+    return 0;
 
-        if (username == "") {
-            cout << " -> enter username: ";
-            getline(cin, username);
-        }
+    password_length = max_password_length;
+    prepare();
 
-        if (realm == "") {
-            cout << " -> enter realm: ";
-            getline(cin, realm);
-        }
+    for (int i = 0; i<100; i++) {
 
-        if (method == "") {
-            cout << " -> enter method: ";
-            getline(cin, method);
-        }
-
-        if (uri == "") {
-            cout << " -> enter uri: ";
-            getline(cin, uri);
-        }
-
-        if (nonce == "") {
-            cout << " -> enter nonce: ";
-            getline(cin, nonce);
-        }
-
-
-        if (finalresponse == "") {
-            cout << " -> enter response: ";
-            getline(cin, finalresponse);
-        }
-
-        if (username != "" && realm != "" && nonce != "" && method != "" && uri != "" && finalresponse != "") {
-            prompt = false;
-            cout << "string -> " << username << ":" << realm << ":" << nonce << ":" << method << ":" << uri << ":" << finalresponse << endl;
-        }
-
+        cout << getNextPassword() << endl;
     }
+    
+    return 0;
+    
+    cout << timestamp() << " Starting Azhans Bruteforce!" << endl;
 
+    string finalresponse = "f2e5deb88d09181be414f2f30e0ae95c";
 
-    cout << endl << timestamp() << " Starting Azhans Bruteforce!" << endl;
-
-    // string finalresponse = "f2e5deb88d09181be414f2f30e0ae95c";
-
-    on_alphabet = false;
-    on_number = false;
-    on_ALPHABET = false;
-    on_symbol = false;
-    on_hex = true;
+    on_alphabet = true;
+    on_number = true;
+    on_ALPHABET = true;
+    on_symbol = true;
 
     bool found = false;
 
